@@ -185,14 +185,20 @@ export class WhatsappComponent implements OnInit {
   }
 
   startPolling() {
-    interval(3000).pipe(
+    interval(8000).pipe( // <-- ¡CAMBIO CLAVE! De 3000 a 8000 (8 segundos)
       takeUntilDestroyed(this.destroyRef),
       switchMap(() => this.api.getWhatsAppConnectionStatus())
     ).subscribe({
       next: (data) => {
         this.connectionStatus.set(data.status);
         this.userName.set(data.user?.name || null);
-        if (data.status !== 'open') this.fetchQR(); else this.qrImage.set(null);
+
+        // Solo pedimos el QR si NO estamos ya conectados
+        if (data.status !== 'open') {
+          this.fetchQR();
+        } else {
+          this.qrImage.set(null);
+        }
       },
       error: () => this.connectionStatus.set('disconnected')
     });
